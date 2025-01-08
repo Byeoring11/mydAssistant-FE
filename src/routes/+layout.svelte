@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition'
 	import '../app.css'
 	import { page } from '$app/state'
 	import SvgRoot from '$lib/components/svg/SvgRoot.svelte';
@@ -53,8 +54,8 @@
 	<div class="layout">
 		<!-- 사이드바 영역 Start -->
 		<nav class="sidebar">
-			<div class="title underline">
-				<a href="/">POMI</a>
+			<div class="title">
+				<a href="/">Mydata Assistant</a>
 			</div>
 
 			<div class="tabs">
@@ -72,14 +73,16 @@
 		<!-- 사이드바 영역 End -->
 
 		<!-- 자식 영역 Start -->
-		<div class="container">
-			{#if currentPath !== '/'}
-				<ContainerTitle />
-			{/if}
-			<main>
-				{@render children()}
-			</main>
-		</div>
+		{#key currentPath}
+			<div class="container" in:fade={{ duration: 100, delay: 150 }} out:fade={{ duration: 100 }}>
+				{#if currentPath !== '/'}
+					<ContainerTitle />
+				{/if}
+				<main>
+					{@render children()}
+				</main>
+			</div>
+		{/key}
 		<!-- 자식 영역 End -->
 	</div>
 	<!-- 메인 영역 End -->
@@ -104,9 +107,9 @@
 		background-image: url('/images/members.jpg');
 		background-size: cover;
 		background-position: center;
-		filter: brightness(var(--updated-brightness, 0.03)) saturate(var(--updated-saturate, 0.8)) blur(var(--updated-blur, 3px)); /* 효과 적용 */
+		filter: brightness(var(--updated-brightness, 0.05)) saturate(var(--updated-saturate, 0.8)) blur(var(--updated-blur, 3px)); /* 효과 적용 */
 		z-index: var(--updated-z-index, -1); /* 텍스트 아래로 */
-		transition: var(--updated-transition, filter 1s);
+		transition: var(--updated-transition, filter 0.5s);
 	}
 
 	#show-bg-btn {
@@ -141,6 +144,7 @@
 	.layout {
 		display: flex;
 		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
+		backdrop-filter: blur(10px);
 		height: 90vh;
 		width: 80vw;
 		border-radius: 3rem;
