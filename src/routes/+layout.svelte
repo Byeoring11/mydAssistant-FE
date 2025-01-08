@@ -1,9 +1,11 @@
 <script lang="ts">
-	import '../app.css';
+	import '../app.css'
 	import { page } from '$app/state'
 	import SvgRoot from '$lib/components/svg/SvgRoot.svelte';
 	import TagIcon from '$lib/components/svg/icons/TagIcon.svelte';
 	import ContainerTitle from '$lib/components/ui/ContainerTitle/ContainerTitle.svelte';
+
+	let { children } = $props();
 
 	interface NavItem {
 		path: string;
@@ -21,20 +23,40 @@
 
 	let currentPath: String = $derived(page.url.pathname);
 
-	let { children } = $props();
+	let isBackgroundActive: boolean = $state(false);
+	function showBackground(): void {
+		isBackgroundActive = !isBackgroundActive;
+
+		const styleProps: Record<string, string> = {
+			'--updated-brightness': '1',
+			'--updated-saturate': '1',
+			'--updated-blur': '0',
+			'--updated-z-index': '1',
+			'--updated-transition': 'filter 1s'
+		};
+		
+		const appElement: HTMLElement = document.querySelector('.app') as HTMLElement;
+		Object.entries(styleProps).forEach(([key, value]) => isBackgroundActive ? appElement.style.setProperty(key, value) : appElement.style.removeProperty(key));
+	}
 </script>
 
+<!-- Svg 설정 초기화 태그 -->
 <SvgRoot />
 
 <div class="app">
+	<!-- 배경 보기 Button 영역-->
+	<button id="show-bg-btn" onclick={showBackground}>
+		<img id='semin-img' src="/images/semin.png" alt="😊" />
+	</button>
+
+	<!-- 메인 영역 Start -->
 	<div class="layout">
 		<!-- 사이드바 영역 Start -->
 		<nav class="sidebar">
-			<!-- Title 영역 -->
-			<div class="title">
+			<div class="title underline">
 				<a href="/">POMI</a>
 			</div>
-			<!-- Tab 영역 -->
+
 			<div class="tabs">
 				{#each navItems as { path, label, tag }}
 					<a href={path} class="tab" class:active={currentPath.startsWith(path)}>
@@ -42,14 +64,14 @@
 					</a>
 				{/each}
 			</div>
-			<!-- 패치노트 영역-->
+			
 			<div class="patch-note">
 				<a href="/"><h3>패치노트</h3></a>
 			</div>
 		</nav>
 		<!-- 사이드바 영역 End -->
 
-		<!-- 메인 영역 Start -->
+		<!-- 자식 영역 Start -->
 		<div class="container">
 			{#if currentPath !== '/'}
 				<ContainerTitle />
@@ -58,16 +80,62 @@
 				{@render children()}
 			</main>
 		</div>
-		<!-- 메인 영역 End -->
+		<!-- 자식 영역 End -->
 	</div>
+	<!-- 메인 영역 End -->
 </div>
 
 <style>
 	.app {
+		position: relative;
 		min-height: 100vh;
 		display: flex;
     	align-items: center;
     	justify-content: center;
+	}
+
+	.app::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-image: url('/images/members.jpg');
+		background-size: cover;
+		background-position: center;
+		filter: brightness(var(--updated-brightness, 0.03)) saturate(var(--updated-saturate, 0.8)) blur(var(--updated-blur, 3px)); /* 효과 적용 */
+		z-index: var(--updated-z-index, -1); /* 텍스트 아래로 */
+		transition: var(--updated-transition, filter 1s);
+	}
+
+	#show-bg-btn {
+		position: absolute;
+		top: 10%;
+		left: 5%;
+		background: none;
+		border: none;
+		filter: blur(5px);
+		z-index: 2;
+	}
+
+	#show-bg-btn:hover {
+		filter: blur(0);
+		transition: 1s;
+	}
+
+	#show-bg-btn:hover::before {
+		position: absolute;
+		top: -2rem;
+		left: -4rem;
+		content: "클릭하면 배경을 볼 수 있어요!";
+		color: var(--color-text-2); 
+		width: max-content;
+	}
+
+	#show-bg-btn #semin-img {
+		width: 2.5rem;
+		height: 2.5rem;
 	}
 
 	.layout {
