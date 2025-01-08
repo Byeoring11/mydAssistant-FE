@@ -1,8 +1,9 @@
 <script lang="ts">
 	import '../app.css';
+	import { page } from '$app/state'
 	import SvgRoot from '$lib/components/svg/SvgRoot.svelte';
 	import TagIcon from '$lib/components/svg/icons/TagIcon.svelte';
-	import { page } from '$app/state'
+	import ContainerTitle from '$lib/components/ui/ContainerTitle/ContainerTitle.svelte';
 
 	interface NavItem {
 		path: string;
@@ -11,7 +12,7 @@
   	}
 
 	const navItems: NavItem[] = [
-		{ path: '/about', label: '대응답', tag: 'deud' },
+		{ path: '/deud', label: '대응답', tag: 'deud' },
 		{ path: '/bxm5', label: 'BXM5', tag: 'bxm5' },
 		{ path: '/bxm4', label: 'BXM4', tag: 'bxm4' },
 		{ path: '/diff', label: 'Diff', tag: 'diff' },
@@ -21,7 +22,6 @@
 	let currentPath: String = $derived(page.url.pathname);
 
 	let { children } = $props();
-
 </script>
 
 <SvgRoot />
@@ -32,7 +32,7 @@
 		<nav class="sidebar">
 			<!-- Title 영역 -->
 			<div class="title">
-				<a href="/"><h2>POMI</h2></a>
+				<a href="/">POMI</a>
 			</div>
 			<!-- Tab 영역 -->
 			<div class="tabs">
@@ -51,6 +51,9 @@
 
 		<!-- 메인 영역 Start -->
 		<div class="container">
+			{#if currentPath !== '/'}
+				<ContainerTitle />
+			{/if}
 			<main>
 				{@render children()}
 			</main>
@@ -69,7 +72,7 @@
 
 	.layout {
 		display: flex;
-		background: linear-gradient(to right bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
 		height: 90vh;
 		width: 80vw;
 		border-radius: 3rem;
@@ -84,8 +87,9 @@
 		align-items: center;
       	text-align: center;
       	justify-content: space-between;
-		border-top-left-radius: 2rem;
-		background: linear-gradient(to right bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+		border-top-left-radius: 2.5rem;
+		border-bottom-left-radius: 2.5rem;
+		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
 		padding: 2rem;
 	}
 
@@ -93,7 +97,7 @@
 		display: flex;
 		flex: 5;
 		flex-direction: column;
-		margin: 2rem;
+		padding: 2rem;
 		overflow: auto;
 	}
 
@@ -124,7 +128,7 @@
 		height: 100%;
 		border-radius: 1rem;
 		z-index: -1;
-		background: linear-gradient(to right bottom, var(--color-theme-1), var(--color-theme-2));
+		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
 		opacity: 0;
 	}
 
@@ -133,7 +137,7 @@
 		border-radius: 2rem;
 		transition: opacity 0.8s ease-out, border-radius 0.5s ease-out;
 		opacity: 1;
-		background: linear-gradient(to right bottom, var(--color-theme-1), var(--color-theme-2));
+		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
 	}
 
 	.tabs .tab h2 {
@@ -142,7 +146,7 @@
 
 	.patch-note {
 		display: flex;
-		background: linear-gradient(to right bottom, var(--color-theme-1), var(--color-theme-2));
+		background: linear-gradient(to right bottom, var(--color-primary-1), var(--color-primary-2));
 		border-radius: 2rem;
 		color: white;
 		padding: 0.5rem 2.5rem;
