@@ -1,0 +1,61 @@
+@import '/fonts/fonts.css';
+
+:root {
+	--font-body: 'Pretendard', sans-serif;
+	--color-bg-0: rgb(18, 18, 18);
+	--color-bg-1: rgb(18, 18, 18);
+	--color-bg-2: rgb(18, 18, 18);
+	--color-theme-1: #FF0058FF;
+	--color-theme-2: #FF00FFFF;
+	--color-text-1: rgba(255, 255, 255, 0.87);
+	--color-text-2: rgba(255, 255, 255, 0.60);
+	--color-text-3: rgba(255, 255, 255, 0.38);
+	--column-width: 42rem;
+	--column-margin-top: 4rem;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+
+	::-webkit-scrollbar {
+		width: 5px;
+	}
+	   
+	::-webkit-scrollbar-track {
+		background: #eeeeee;
+		border-radius: 5px;
+	}
+	
+	::-webkit-scrollbar-thumb {
+		background: linear-gradient(#c2e59c, #64b3f4);
+		border-radius: 5px;
+	}
+
+	::-webkit-scrollbar-track {
+		display: none;
+	}
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+html {
+	font-family: var(--font-body);
+	font-size: 16px;
+	scroll-behavior: smooth;
+}
+
+body {
+	color: var(--color-text-1);
+	background-color: var(--color-bg-0);
+	line-height: 1.5;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
