@@ -1,7 +1,7 @@
 <script lang="ts">
     let { tagName } = $props();
 
-    const size: number = $state(30);
+    const size: number = $state(23);
     const iconPaths = {
         deud: "m9 0h-6a3 3 0 0 0 -3 3v6h5v2h-2v2h6v-2h-2v-2h5v-6a3 3 0 0 0 -3-3zm1 7h-8v-4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1zm11 4h-4a3 3 0 0 0 -3 3v10h10v-10a3 3 0 0 0 -3-3zm1 11h-6v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1zm-5-17h-3v-2h3a3 3 0 0 1 3 3v3h-2v-3a1 1 0 0 0 -1-1zm-9 14h4v2h-4a3 3 0 0 1 -3-3v-3h2v3a1 1 0 0 0 1 1zm12 1a1 1 0 1 1 -1-1 1 1 0 0 1 1 1z",
         bxm5: "M12,18h-4v-2h4c1.103,0,2-.897,2-2s-.897-2-2-2h-4V6h7v2h-5v2h2c2.206,0,4,1.794,4,4s-1.794,4-4,4ZM24,3c0-1.654-1.346-3-3-3H3C1.346,0,0,1.346,0,3V24H24V3ZM2,3c0-.551,.449-1,1-1H21c.551,0,1,.449,1,1V22H2V3Z",

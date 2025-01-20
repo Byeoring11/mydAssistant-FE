@@ -1,28 +1,16 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition'
-	import '../app.css'
-	import { page } from '$app/state'
+	import { type Snippet } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { page } from '$app/state';
 	import SvgRoot from '$lib/components/svg/SvgRoot.svelte';
 	import TagIcon from '$lib/components/svg/icons/TagIcon.svelte';
-	import ContainerTitle from '$lib/components/ui/ContainerTitle/ContainerTitle.svelte';
+	import '../app.css';
+	import type { LayoutData } from './$types';
 
-	let { children } = $props();
+	let { data, children }: { data: LayoutData, children: Snippet } = $props();
 
-	interface NavItem {
-		path: string;
-		label: string;
-		tag: string;
-  	}
-
-	const navItems: NavItem[] = [
-		{ path: '/deud', label: '대응답', tag: 'deud' },
-		{ path: '/bxm5', label: 'BXM5', tag: 'bxm5' },
-		{ path: '/bxm4', label: 'BXM4', tag: 'bxm4' },
-		{ path: '/diff', label: 'Diff', tag: 'diff' },
-		{ path: '/utils', label: 'Utils', tag: 'utils' }
-	];
-
-	let currentPath: String = $derived(page.url.pathname);
+	let { navItems } = data;
+	let currentPath: string = $derived(page.url.pathname);
 
 	let isBackgroundActive: boolean = $state(false);
 	function showBackground(): void {
@@ -46,41 +34,42 @@
 
 <div class="app">
 	<!-- 배경 보기 Button 영역-->
-	<button id="show-bg-btn" onclick={showBackground}>
-		<img id='semin-img' src="/images/semin.png" alt="😊" />
-	</button>
+	<div id="show-bg-container">
+		<div id="show-bg-btn-label">클릭해서 배경 보기!</div>
+		<button id="show-bg-btn" onclick={showBackground}>
+			<img id='semin-img' src="/images/semin.png" alt="😊" />
+		</button>
+	</div>
 
 	<!-- 메인 영역 Start -->
 	<div class="layout">
 		<!-- 사이드바 영역 Start -->
 		<nav class="sidebar">
-			<div class="title">
-				<a href="/">Mydata Assistant</a>
+			<div class="sidebar__block">
+				<a href="/" class="sidebar__title">
+					<span class="sidebar__title__text">Mydata Assist</span>
+				</a>
+				<div class="sidebar__tabs">
+					{#each navItems as { path, label, tag }}
+						<a href={path} class="sidebar__tab" class:active={currentPath.startsWith(path)}>
+							<TagIcon tagName={tag} />
+							<span class="sidebar__tab__text">{label}</span>
+						</a>
+					{/each}
+				</div>
 			</div>
-
-			<div class="tabs">
-				{#each navItems as { path, label, tag }}
-					<a href={path} class="tab" class:active={currentPath.startsWith(path)}>
-						<TagIcon tagName={tag} /><h2>{label}</h2>
-					</a>
-				{/each}
-			</div>
-			
-			<div class="patch-note">
-				<a href="/"><h3>패치노트</h3></a>
+			<div class="sidebar__block">
+				<a href="/" class="sidebar__patch-note">
+					<span class="sidebar__patch-note__text">패치 노트</span>
+				</a>
 			</div>
 		</nav>
 		<!-- 사이드바 영역 End -->
 
 		<!-- 자식 영역 Start -->
 		{#key currentPath}
-			<div class="container" in:fade={{ duration: 100, delay: 150 }} out:fade={{ duration: 100 }}>
-				{#if currentPath !== '/'}
-					<ContainerTitle />
-				{/if}
-				<main>
-					{@render children()}
-				</main>
+			<div class="container" in:fade={{ duration: 150, delay: 150 }}>
+				{@render children()}
 			</div>
 		{/key}
 		<!-- 자식 영역 End -->
@@ -107,120 +96,147 @@
 		background-image: url('/images/members.jpg');
 		background-size: cover;
 		background-position: center;
-		filter: brightness(var(--updated-brightness, 0.05)) saturate(var(--updated-saturate, 0.8)) blur(var(--updated-blur, 3px)); /* 효과 적용 */
-		z-index: var(--updated-z-index, -1); /* 텍스트 아래로 */
+		filter: brightness(var(--updated-brightness, 0.15)) saturate(var(--updated-saturate, 0.8)) blur(var(--updated-blur, 3px)); /* 효과 적용 */
+		z-index: var(--updated-z-index, -1);
 		transition: var(--updated-transition, filter 0.5s);
 	}
 
-	#show-bg-btn {
+	#show-bg-container {
 		position: absolute;
 		top: 10%;
-		left: 5%;
+		left: 0;
+		display: flex;
+		flex-direction: column;
 		background: none;
 		border: none;
-		filter: blur(5px);
 		z-index: 2;
 	}
 
-	#show-bg-btn:hover {
-		filter: blur(0);
-		transition: 1s;
-	}
-
-	#show-bg-btn:hover::before {
-		position: absolute;
-		top: -2rem;
-		left: -4rem;
-		content: "클릭하면 배경을 볼 수 있어요!";
+	#show-bg-container #show-bg-btn-label {
+		font-size: 0.8rem;
 		color: var(--color-text-2); 
 		width: max-content;
+		opacity: 0;
 	}
 
-	#show-bg-btn #semin-img {
+	#show-bg-container #show-bg-btn {
+		border: none;
+		background: none;
+	}
+
+	#show-bg-container #show-bg-btn #semin-img {
 		width: 2.5rem;
 		height: 2.5rem;
+		filter: brightness(0.5) saturate(0.5) blur(5px);
+		clip-path: circle(50% at 50% 50%);
+		background: none;
+		border: none;
+	}
+
+	#show-bg-container:hover #show-bg-btn-label {
+		opacity: 1;
+		transition: opacity .8s;
+	}
+
+	#show-bg-container:hover #show-bg-btn #semin-img {
+		filter: brightness(1) saturate(1) blur(0);
+		transform: scale(1.1);
+		transition: all 1s;
 	}
 
 	.layout {
 		display: flex;
 		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
-		backdrop-filter: blur(10px);
-		height: 90vh;
-		width: 80vw;
-		border-radius: 3rem;
+		backdrop-filter: blur(50px);
+		height: 80vh;
+		width: 85vw;
+		border-radius: 2rem;
 		border-top: 1px solid rgba(255, 255, 255, 0.1);
 		border-left: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.sidebar {
+		height: 100%;
+		flex: 0 0 max-content;
 		display: flex;
-		flex: 1;
 		flex-direction: column;
+		justify-content: space-between;
 		align-items: center;
       	text-align: center;
-      	justify-content: space-between;
-		border-top-left-radius: 2.5rem;
-		border-bottom-left-radius: 2.5rem;
+		border-top-left-radius: 1.8rem;
+		border-bottom-left-radius: 1.8rem;
 		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
-		padding: 2rem;
+		padding: 2rem 1.5rem;
 	}
 
 	.container {
+		flex: 1;
 		display: flex;
-		flex: 5;
 		flex-direction: column;
 		padding: 2rem;
 		overflow: auto;
 	}
 
-	.tabs {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-evenly;
+	.sidebar__block {
+		width: 100%;
 	}
 
-	.tabs .tab {
-		width: 100%;
-		position: relative;
+	.sidebar__title {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: center;
-		margin: 0.5rem;
-		padding: 0.5rem 2.5rem;
+		border-bottom: 1px solid gray;
+		height: 3rem;
 	}
 
-	.tabs .tab::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
+	.sidebar__title__text {
+		font-size: 1.5rem;
+		font-weight: bold;
+		background: linear-gradient(135deg, #e9534e, #f35597, #ef734e, #ecb214);
+		background-clip: text;
+		color: transparent;
+		margin-bottom: 0.8rem;
+	}
+
+	.sidebar__tabs {
 		width: 100%;
-		height: 100%;
-		border-radius: 1rem;
-		z-index: -1;
-		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
-		opacity: 0;
-	}
-
-	.tabs .tab:hover::before,
-	.tabs .tab.active::before {
-		border-radius: 2rem;
-		transition: opacity 0.8s ease-out, border-radius 0.5s ease-out;
-		opacity: 1;
-		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
-	}
-
-	.tabs .tab h2 {
-		padding: 0 1rem;
-	}
-
-	.patch-note {
 		display: flex;
-		background: linear-gradient(to right bottom, var(--color-primary-1), var(--color-primary-2));
-		border-radius: 2rem;
-		color: white;
-		padding: 0.5rem 2.5rem;
+		flex-direction: column;
+		margin-top: 0.4em;
+	}
+
+	.sidebar__tab {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		text-align: center;
+		justify-content: left;
+		padding: 0.4rem 0;
+	}
+
+	.sidebar__tab:hover,
+	.sidebar__tab.active {
+		transform: scale(1.05);
+		transform-origin: left;
+		transition: transform 0.4s;
+		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
+		background-clip: text;
+		color: transparent;
+	}
+
+	.sidebar__tab__text {
+		margin-left: 0.7rem;
+		font-size: 1.2rem;
+	}
+
+	.sidebar__patch-note {
+		padding: 0.7rem 1.5rem;
+		border-radius: 1.5rem;
+		background: linear-gradient(to right bottom, var(--color-bg-1), var(--color-bg-2));
+	}
+
+	.sidebar__patch-note__text {
+		font-size: 1.1rem;
+		font-weight: 600;
 	}
 </style>

@@ -1,4 +1,3 @@
-
 <script lang="ts">
 	import ContainerTab from "$lib/components/ui/ContainerTab/ContainerTab.svelte";
 
@@ -6,8 +5,8 @@
 </script>
 
 <svelte:head>
-    <title>Mydata Assistant - BXM4</title>
-    <meta name="description" content="BXM4 Helper" />
+    <title>Mydata Assistant - Diff</title>
+	<meta name="description" content="Diff Check Tool for deployments" />
 </svelte:head>
 
 <ContainerTab bind:activeTabId={activeTabId} />

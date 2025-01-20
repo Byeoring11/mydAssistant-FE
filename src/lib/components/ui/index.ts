@@ -1,1 +1,1 @@
-export { default as ContainerTitle } from './ContainerTitle/ContainerTitle.svelte';
+export { default as ContainerTab } from './ContainerTab/ContainerTab.svelte';
