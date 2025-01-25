@@ -8,24 +8,26 @@
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData, children: Snippet } = $props();
-
 	let { navItems } = data;
+	
+	const styleProps: Record<string, string> = {
+		'--updated-brightness': '1',
+		'--updated-saturate': '1',
+		'--updated-blur': '0',
+		'--updated-z-index': '1',
+		'--updated-transition': 'filter 1s'
+	};
+
 	let currentPath: string = $derived(page.url.pathname);
-
 	let isBackgroundActive: boolean = $state(false);
-	function showBackground(): void {
+	
+	function toggleBackground(): void {
 		isBackgroundActive = !isBackgroundActive;
-
-		const styleProps: Record<string, string> = {
-			'--updated-brightness': '1',
-			'--updated-saturate': '1',
-			'--updated-blur': '0',
-			'--updated-z-index': '1',
-			'--updated-transition': 'filter 1s'
-		};
 		
 		const appElement: HTMLElement = document.querySelector('.app') as HTMLElement;
-		Object.entries(styleProps).forEach(([key, value]) => isBackgroundActive ? appElement.style.setProperty(key, value) : appElement.style.removeProperty(key));
+		Object.entries(styleProps).forEach(([key, value]) => 
+			isBackgroundActive ? appElement.style.setProperty(key, value) : appElement.style.removeProperty(key)
+		);
 	}
 </script>
 
@@ -36,7 +38,7 @@
 	<!-- 배경 보기 Button 영역-->
 	<div id="show-bg-container">
 		<div id="show-bg-btn-label">클릭해서 배경 보기!</div>
-		<button id="show-bg-btn" onclick={showBackground}>
+		<button id="show-bg-btn" onclick={toggleBackground}>
 			<img id='semin-img' src="/images/semin.png" alt="😊" />
 		</button>
 	</div>
