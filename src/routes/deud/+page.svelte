@@ -38,6 +38,7 @@
 			const invalidCusnoCount = invalidCusnoList.length;
 			cusnoErrorMsg = `잘못된 형식의 고객번호 ${invalidCusnoCount}개 제외 (${joinedInvalidCusno})`;
 		};
+
 		invalidCusnoList = [];
 	};
 
@@ -80,7 +81,7 @@
 			<!-- 1.2 고객번호 리스트 태그 영역 -->
 			<div class="cusno-block">
 				{#each cusnoList as cusno, index (cusno)}
-					<div class="cusno-block__tag" in:receive={{ key: cusno }} out:send={{ key: cusno }} animate:flip={{ duration: 300}}>
+					<div class="cusno-block__tag" in:receive={{ key: cusno }} animate:flip={{ duration: 350 }}>
 						<span class="cusno-block__tag__text">{cusno}</span>
 						<button class="cusno-block__tag__button" onclick={removeCusnoTag(index)}>
 							<XIcon size={10}/>
@@ -94,9 +95,9 @@
 		<!-- 2. 대응답 진행 상태 & 로딩 영역 Start-->
 		<div class="deud-block">
 			<div class="step-block">
-				<LoadingBox serverType={1}/>
-				<LoadingBox serverType={2}/>
-				<LoadingBox serverType={3}/>
+				<LoadingBox serverType={1} state={1}/>
+				<LoadingBox serverType={2} state={1}/>
+				<LoadingBox serverType={3} state={1}/>
 			</div>
 		</div>
 		<!-- 2. 대응답 진행 상태 & 로딩 영역 End-->
@@ -106,7 +107,7 @@
 		<!-- 3. 대응답 시작 버튼 영역 Start -->
 		<div class="deud-block">
 			<div class="launch-block">
-				<button class="launch-block__button" onclick={() => console.log('launch')}>
+				<button class="launch-block__button" onclick={() => {console.log('launch')}}>
 					<span class="launch-block__button__text">대응답 Launch!</span>
 				</button>
 			</div>
@@ -117,7 +118,7 @@
 		<div id="content-1" class="deud-container">
 			<div class="deud-block">
 				<div class="launch-block">
-					<button class="launch-block__button" onclick={() => console.log('launch')}>
+					<button class="launch-block__button" onclick={() => {console.log('launch')}}>
 						<span class="launch-block__button__text">대응답 Launch!</span>
 					</button>
 				</div>
@@ -306,6 +307,6 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		background-color: #121212fa;
+		background-color: rgba(18, 18, 18, 0.98);
 	}
 </style>

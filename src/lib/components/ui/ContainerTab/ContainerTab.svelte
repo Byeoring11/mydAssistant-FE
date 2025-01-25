@@ -1,7 +1,5 @@
 <script lang='ts'>
 	import { page } from '$app/state';
-
-
     import tabs from './tabs';
 
     let { activeTabId = $bindable('tab-0') }: { activeTabId: string } = $props();
