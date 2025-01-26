@@ -1,36 +1,24 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Server, LoadingState } from '$lib/constants/server';
+	import { timerStore } from './Timer';
 
 	let { serverType, state }: { serverType: number, state: number } = $props();
-    
-    const Server: Record<string, number> = {
-		wdexpa1p: 1,
-		edwap1t: 2,
-		mypap1d: 3
-	};
 
-	const State: Record<string, number> = {
-		pending: 1,
-		loading: 2,
-		success: 3,
-		error: 9
-	}
+	
 	
     const loadingBoxColor = ['#03e9f4', '#f355f4', '#ecb214'];
     
     onMount(() => {
 		const h2Element: HTMLElement = document.querySelector(`#loading-box-${serverType}`) as HTMLElement;
 		h2Element.style.setProperty('--loading-box-color', loadingBoxColor[serverType - 1]);
-
-		const timerElement: HTMLElement = document.querySelector('#timer') as HTMLElement;
-		const innerTimerElement: HTMLElement = document.querySelector(`#${serverName}`) as HTMLElement;
 	});
 
-	const serverName = Object.keys(Server).find((key) => Server[key] === serverType);
-	const currentState = $derived(Object.keys(State).find((key) => State[key] === state));
+	const serverName: string = Server[serverType];
+	const loadingState: string = $derived(LoadingState[state]);
 </script>
 
-<div id="loading-box-{serverType}" class="step-block__loading-box step-block__loading-box--{currentState}">
+<div id="loading-box-{serverType}" class="step-block__loading-box step-block__loading-box--{loadingState}">
 	<div class="step-block__loading-box__border">
 		<span></span>
 		<span></span>
@@ -41,7 +29,9 @@
 		{serverName}
 	</h2>
 	<br>
-	<div id={serverName}>00:00</div>
+	<div class="step-block__loading-box__time">
+		{$timerStore[serverName].min}:{$timerStore[serverName].sec}:{$timerStore[serverName].msec}
+	</div>
 </div>
 
 <style>
@@ -111,7 +101,10 @@
 			width: 100%;
 		}
 	}
-
+	
+	.step-block__loading-box__time {
+		font-variant-numeric: tabular-nums;
+	}
 	
 	.step-block__loading-box--loading span {
 		position: absolute;

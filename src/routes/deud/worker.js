@@ -22,5 +22,8 @@ onmessage = function (e) {
 
     if (e.data === 'stop') {
         this.clearInterval(intervalId);
+        min = 0;
+        sec = 0;
+        msec = 0;
     }
 };

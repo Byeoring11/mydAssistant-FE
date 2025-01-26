@@ -4,15 +4,13 @@
 
     let { activeTabId = $bindable('tab-0') }: { activeTabId: string } = $props();
 
-    let path = $state(page.url.pathname.split('/')[1]);
+    let path: string = $state(page.url.pathname.split('/')[1]);
     const labels: string[] = tabs.get(path)?.getLabels() || ['Home'];
 
-    function tabChange(event: Event) {
-        const target = event.target as HTMLInputElement;
-        if(target.checked) {
-            activeTabId = target.id;
-        }
-    }    
+    function tabChange(event: Event): void {
+        const target: HTMLInputElement = event.target as HTMLInputElement;
+        if(target.checked) activeTabId = target.id;
+    }
 </script>
 
 <header>
