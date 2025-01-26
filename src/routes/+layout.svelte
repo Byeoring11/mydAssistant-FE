@@ -6,6 +6,7 @@
 	import TagIcon from '$lib/components/svg/icons/TagIcon.svelte';
 	import '../app.css';
 	import type { LayoutData } from './$types';
+	import Notification from '$lib/components/ui/FloatingUI/Notification.svelte';
 
 	let { data, children }: { data: LayoutData, children: Snippet } = $props();
 	let { navItems } = data;
@@ -33,7 +34,7 @@
 
 <!-- Svg 설정 초기화 태그 -->
 <SvgRoot />
-
+<Notification />
 <div class="app">
 	<!-- 배경 보기 Button 영역-->
 	<div id="show-bg-container">

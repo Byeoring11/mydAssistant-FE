@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { onDestroy, onMount } 			from 'svelte';
-	import { flip } 			from 'svelte/animate';
-	import { send, receive } 	from '$lib/utils/transition/crossfade'
-	import XIcon 				from '$lib/components/svg/icons/XIcon.svelte';
-	import { Server } 			from '$lib/constants/server';
-	import { Timer, timerStore, timerListStore } 			from './Timer';
-    import { CusnoValidator }	from './CusnoValidator';
-	import LoadingBox 			from './LoadingBox.svelte';
-	import { beforeNavigate, onNavigate } from '$app/navigation';
-	import { get } from 'svelte/store';
-	import { delay } from '$lib/utils/common/common';
+	import { onDestroy, onMount } from 'svelte';
+	import { flip } from 'svelte/animate';
+	import { beforeNavigate } from '$app/navigation';
+
+	import { send, receive } from '$lib/utils/transition/crossfade';
+	import { Server } from '$lib/constants/server';
+	import XIcon from '$lib/components/svg/icons/XIcon.svelte';
+	import { showNotification } from '$lib/components/ui/FloatingUI/notificationStore';
+
+	import { Timer, timerListStore } from './Timer';
+	import LoadingBox from './LoadingBox.svelte';
+	import { CusnoValidator } from './CusnoValidator';
 
     /**
      * 고객번호 관련 Script
@@ -50,7 +51,6 @@
 		});
 	});
 
-	let showModal: boolean = $state(false);
 	let runningState: boolean = $state(false);
 	let loadingState: number[] = $state([1, 1, 1]);
 
@@ -66,30 +66,84 @@
 		loadingState = [1, 1, 1];
 	};
 
-	let executeTask = async (serverType: number) => {
-		let serverName = Server[serverType];
-		
-		$timerListStore[serverName].start();
-		loadingState[serverType - 1] = 2;
+	let executeTask = async (serverType: number): Promise<void> => {
+		return new Promise((resolve, reject) => {
 
-		await delay(3500);
-
-		$timerListStore[serverName].stop();
-		loadingState[serverType - 1] = 3;
+			let serverName = Server[serverType];
+			
+			$timerListStore[serverName].start();
+			loadingState[serverType - 1] = 2;
+	
+			let logs: string[] = [];
+			const socket = new WebSocket("ws://172.30.1.42:80/ws");
+	
+			socket.onopen = () => {
+				console.log("WebSocket 연결 성공, readyState:", socket.readyState);
+	
+				socket.send(JSON.stringify({ type: "start", serverType }));
+			};
+	
+			// WebSocket 메시지 수신
+			socket.onmessage = (event) => {
+				const message = event.data;
+	
+				if (message.startsWith("PROCESS_COMPLETED:")) {
+					// 셸 명령 완료 시 타이머 중지 및 로딩 상태 업데이트
+					$timerListStore[serverName].stop();
+					loadingState[serverType - 1] = 3;
+					socket.close(); // WebSocket 연결 종료
+				} else if (message.startsWith("PROCESS_STOPPED:")) {
+					// 셸 명령 중지 시 타이머 중지 및 로딩 상태 업데이트
+					$timerListStore[serverName].stop();
+					loadingState[serverType - 1] = 9;
+					socket.close(); // WebSocket 연결 종료
+				} else if (message.startsWith("PROCESS_ERROR:")) {
+					// 셸 명령 에러 시 타이머 중지 및 로딩 상태 업데이트
+					$timerListStore[serverName].stop();
+					loadingState[serverType - 1] = 9;
+					console.error("Shell process encountered an error:", message);
+					socket.close(); // WebSocket 연결 종료
+				} else if (message.startsWith("ERROR: Another")) {
+					$timerListStore[serverName].stop();
+					loadingState[serverType - 1] = 1;
+					reject();
+				} else {
+					logs = [...logs, message]; // 로그 업데이트
+					console.log(logs);
+				}
+			};
+	
+			// WebSocket 에러 처리
+			socket.onerror = () => {
+				console.error("WebSocket 연결 오류 발생");
+				$timerListStore[serverName].stop();
+				loadingState[serverType - 1] = 9;
+				socket.close();
+			};
+	
+			socket.onclose = () => {
+				console.log("WebSocket 연결 종료");
+				resolve();
+			}
+		})
 	};
 
 	let launchDeud = async () => {
 		if (runningState) {
-			showModal = true;
+			showNotification("진행 중인 작업이 있습니다.");
 			return;
 		}
 
 		runningState = true;
 		await resetTimers();
 		await resetLoadingState();
-		await executeTask(1);
-		await executeTask(2);
-		await executeTask(3);
+		try {
+			await executeTask(1);
+			await executeTask(2);
+			await executeTask(3);
+		} catch (error: any) {
+			showNotification("다른 사용자가 이미 사용하고 있습니다.");
+		}
 		runningState = false;
 	}; 
 
@@ -103,10 +157,8 @@
 
 	onDestroy(() => {
 		terminateTimers();
-	})
-
+	});
 </script>
-
 <!-- 1. 고객번호 영역 Start-->
 <div class="deud-block">
     <!-- 1.1 고객번호 입력 영역-->

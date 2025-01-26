@@ -1,6 +1,6 @@
 // import { API_BASE_URL } from '$env/static/private'
 
-const BASE_URL = "http://localhost:5173";
+const BASE_URL = "http://localhost:8080";
 
 async function http<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${BASE_URL}${endpoint}`;
