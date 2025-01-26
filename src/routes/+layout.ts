@@ -12,3 +12,5 @@ export const load: LayoutLoad = async () => {
 
     return { navItems };
 }
+
+export const prerender = true;
