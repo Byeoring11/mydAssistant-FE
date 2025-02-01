@@ -191,6 +191,10 @@
 
 <!-- 2. 대응답 진행 상태 & 로딩 영역 Start-->
 <div class="deud-block">
+	<div class="ws-state-block">
+		<div class="ws-state-block__dot--green"></div>
+		<span class="ws-state-block__text">대응답 적재 가능</span>
+	</div>
     <div class="step-block">
         <LoadingBox serverType={1} state={loadingState[0]}/>
         <LoadingBox serverType={2} state={loadingState[1]}/>
@@ -313,6 +317,32 @@
 		cursor: pointer;
 		padding-left: 0.3rem;
 		line-height: 1rem;
+	}
+
+	.ws-state-block {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.ws-state-block__dot--green {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		position: relative;
+		box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+		animation: glow 1.5s infinite alternate;
+		background-color: #00ff00; /* 초록색 */
+ 		box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
+	}
+
+	@keyframes glow {
+		0% {
+			opacity: 0.5;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 
 	.step-block {
