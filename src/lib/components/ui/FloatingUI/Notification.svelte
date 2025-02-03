@@ -7,7 +7,7 @@
 
 {#if $notification.visible}
   <div transition:fade="{{ duration: 300 }}" class="notification">
-      {$notification.message}
+      {@html $notification.message} 
   </div>
 {/if}
 
@@ -18,7 +18,7 @@
       left: 50%;
       transform: translateX(-50%);
       padding: 10px 20px;
-      background-color: #ac1d1d;
+      background-color: #f14a3f;
       color: white;
       border-radius: 5px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
