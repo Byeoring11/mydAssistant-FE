@@ -2,7 +2,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { beforeNavigate } from '$app/navigation';
-	import { type Readable } from 'svelte/store';
 
 	import { send, receive } from '$lib/utils/transition/crossfade';
 	import { Server, LoadingState } from '$lib/constants/server';
@@ -12,6 +11,7 @@
 	import { Timer, timerListStore } from './Timer';
 	import LoadingBox from './LoadingBox.svelte';
 	import { CusnoValidator } from './CusnoValidator';
+	import { get } from 'svelte/store';
 
     
 	/**
@@ -41,7 +41,7 @@
 	 * - 유효하지 않은 고객번호 리스트 초기화
 	 */
 	const resetInputCusno = (): void => {
-		showNotification(`올바르지 않은 형식의 고객번호 ${invalidCusnoList.length}개 제외 <br/> ${invalidCusnoList.join(', ')}`);
+		showNotification("warning", `올바르지 않은 형식의 고객번호 ${invalidCusnoList.length}개 제외 <br/> ${invalidCusnoList.join(', ')}`);
 		inputCusno = "";
 		invalidCusnoList = [];
 	};
@@ -121,6 +121,17 @@
 						cleanupTask();
 					}
 					break;
+
+				case 'task_cancelled':
+					console.log("Task cancelled");
+					if (currentServerType === msg.serverType && currentTaskResolver) {
+						const serverName = Server[msg.serverType];
+						$timerListStore[serverName].stop();
+						loadingState[msg.serverType - 1] = 9;
+
+						currentTaskResolver.reject(new Error("Task cancelled"));
+						cleanupTask();
+					}
 				
 				case 'task_error':
 					if (currentServerType === msg.serverType && currentTaskResolver) {
@@ -157,68 +168,6 @@
 		loadingState = [1, 1, 1];
 	};
 
-	// let executeTask = async (serverType: number): Promise<void> => {
-	// 	return new Promise((resolve, reject) => {
-
-	// 		let serverName = Server[serverType];
-			
-	// 		$timerListStore[serverName].start();
-	// 		loadingState[serverType - 1] = 2;
-	
-	// 		let logs: string[] = [];
-	// 		const socket = new WebSocket("ws://172.30.1.42/ws");
-	
-	// 		socket.onopen = () => {
-	// 			console.log("WebSocket 연결 성공, readyState:", socket.readyState);
-	
-	// 			socket.send(JSON.stringify({ type: "start", serverType }));
-	// 		};
-	
-	// 		// WebSocket 메시지 수신
-	// 		socket.onmessage = (event) => {
-	// 			const message = event.data;
-	
-	// 			if (message.startsWith("PROCESS_COMPLETED:")) {
-	// 				// 셸 명령 완료 시 타이머 중지 및 로딩 상태 업데이트
-	// 				$timerListStore[serverName].stop();
-	// 				loadingState[serverType - 1] = 3;
-	// 				socket.close(); // WebSocket 연결 종료
-	// 			} else if (message.startsWith("PROCESS_STOPPED:")) {
-	// 				// 셸 명령 중지 시 타이머 중지 및 로딩 상태 업데이트
-	// 				$timerListStore[serverName].stop();
-	// 				loadingState[serverType - 1] = 9;
-	// 				socket.close(); // WebSocket 연결 종료
-	// 			} else if (message.startsWith("PROCESS_ERROR:")) {
-	// 				// 셸 명령 에러 시 타이머 중지 및 로딩 상태 업데이트
-	// 				$timerListStore[serverName].stop();
-	// 				loadingState[serverType - 1] = 9;
-	// 				console.error("Shell process encountered an error:", message);
-	// 				socket.close(); // WebSocket 연결 종료
-	// 			} else if (message.startsWith("ERROR: Another")) {
-	// 				$timerListStore[serverName].stop();
-	// 				loadingState[serverType - 1] = 1;
-	// 				reject(message);
-	// 			} else {
-	// 				logs = [...logs, message]; // 로그 업데이트
-	// 				console.log(logs);
-	// 			}
-	// 		};
-	
-	// 		// WebSocket 에러 처리
-	// 		socket.onerror = () => {
-	// 			console.error("WebSocket 연결 오류 발생");
-	// 			$timerListStore[serverName].stop();
-	// 			loadingState[serverType - 1] = 9;
-	// 			socket.close();
-	// 		};
-	
-	// 		socket.onclose = () => {
-	// 			console.log("WebSocket 연결 종료");
-	// 			resolve();
-	// 		}
-	// 	})
-	// };
-
 	let executeTask = async (serverType: number): Promise<void> => {
 		return new Promise((resolve, reject) => {
 			currentServerType = serverType;
@@ -232,12 +181,12 @@
 
 	let launchDeud = async () => {
 		if (!taskState) {
-			showNotification("다른 사용자가 대응답 적재 중입니다.");
+			showNotification("error", "다른 사용자가 대응답 적재 중입니다.");
 			return;
 		}
 
 		if (runningState) {
-			showNotification("이미 대응답 프로세스 진행 중입니다.");
+			showNotification("error", "이미 대응답 프로세스 진행 중입니다.");
 			return;
 		}
 
@@ -252,7 +201,11 @@
 			await executeTask(3);
 
 		} catch (error: any) {
-			showNotification(`대응답 적재 중 에러가 발생했습니다. <br/> ${error}`);
+			if (error.message === "Task cancelled") {
+				showNotification("info", `대응답 프로세스가 중단되었습니다.`);
+			} else {
+				showNotification("error", `대응답 적재 중 에러가 발생했습니다. <br/> ${error}`);
+			}
 		} finally {
 			runningState = false;
 		}
@@ -266,15 +219,14 @@
 		}
 	});
 
-	onDestroy(() => {
-		terminateTimers();
+	onDestroy(async () => {
+		await terminateTimers();
 		if (currentServerType !== null){
 			websocket.send(JSON.stringify({
 				action: "task_cancel",
 				serverType: currentServerType
 			}));
 		}
-		websocket?.close();
 	});
 </script>
 
