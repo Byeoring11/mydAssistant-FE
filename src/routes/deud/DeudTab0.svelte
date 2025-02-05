@@ -4,15 +4,18 @@
 	import { beforeNavigate } from '$app/navigation';
 
 	import { send, receive } from '$lib/utils/transition/crossfade';
-	import { Server, LoadingState } from '$lib/constants/server';
+	// import { Server, LoadingState } from '$lib/constants/server';
 	import XIcon from '$lib/components/svg/icons/XIcon.svelte';
 	import { showNotification } from '$lib/components/ui/FloatingUI/notificationStore';
 
-	import { Timer, timerListStore } from './Timer';
+	// import { Timer } from './modules/Timer';
+	// import { timerListStore } from './store/TimerStore';
 	import LoadingBox from './LoadingBox.svelte';
-	import { CusnoValidator } from './CusnoValidator';
+	import { CusnoValidator } from './modules/CusnoValidator';
 	import { get } from 'svelte/store';
-
+	import { TaskManager } from './modules/TaskManager';
+	import { WebSocketService } from './services/WebSocketService';
+	import { taskStore } from './store/TaskStore';
     
 	/**
 	 *  *========================================================================
@@ -60,173 +63,33 @@
 	 *  *==================== 대응답 프로세스 관련 Script =========================
 	 *  *========================================================================
 	 */
-
-	let websocket: WebSocket;
-	let taskState: boolean = $state(true);
-	let runningState: boolean = $state(false);
-	let loadingState: number[] = $state([1, 1, 1]);
-	let currentTaskResolver: { resolve: () => void, reject: (err: Error) => void } | null = null;
-  	let currentServerType: number | null = null;
+	let taskManager: TaskManager | null = $state(null);
 
 	onMount(async () => {
-		await initTimers();
-		await initWebSocket();
+		await WebSocketService.getInstance().connect("ws://172.30.1.42/ws");
+		taskManager = new TaskManager();
 	});
 
-	const initTimers = async () => {
-		const timer1 = new Timer('wdexpa1p');
-		const timer2 = new Timer('edwap1t');
-		const timer3 = new Timer('mypap1d');
-		
-		timerListStore.set({
-			'wdexpa1p': timer1,
-			'edwap1t': timer2,
-			'mypap1d': timer3,
-		});
-	};
+	const startTask = async () => {
+		await taskManager?.launchDeud();
+	}
 
-	const initWebSocket = async () => {
-		websocket = new WebSocket("ws://172.30.1.42/ws");
-
-		websocket.onopen = () => {
-			console.log("WebSocket 연결 성공, readyState:", websocket.readyState);
-		};
-
-		websocket.onmessage = (event) => {
-			const msg = JSON.parse(event.data);
-
-			switch (msg.type) {
-				case 'task_state_update':
-					taskState = msg.state;
-					break;
-
-				case 'task_start':
-					if (currentServerType === msg.serverType && currentTaskResolver) {
-						const serverName = Server[msg.serverType];
-						$timerListStore[serverName].start();
-						loadingState[msg.serverType - 1] = 2;
-					}
-
-				case 'task_log':
-					console.log(`Task log from server ${msg.serverType}: ${msg.value}`);
-					break;
-				
-				case 'task_complete':
-					if (currentServerType === msg.serverType && currentTaskResolver) {
-						const serverName = Server[msg.serverType];
-						$timerListStore[serverName].stop();
-						loadingState[msg.serverType - 1] = 3;
-
-						currentTaskResolver.resolve();
-						cleanupTask();
-					}
-					break;
-
-				case 'task_cancelled':
-					console.log("Task cancelled");
-					if (currentServerType === msg.serverType && currentTaskResolver) {
-						const serverName = Server[msg.serverType];
-						$timerListStore[serverName].stop();
-						loadingState[msg.serverType - 1] = 9;
-
-						currentTaskResolver.reject(new Error("Task cancelled"));
-						cleanupTask();
-					}
-				
-				case 'task_error':
-					if (currentServerType === msg.serverType && currentTaskResolver) {
-						const serverName = Server[msg.serverType];
-						$timerListStore[serverName].stop();
-						loadingState[msg.serverType - 1] = 9;
-						
-						currentTaskResolver.reject(new Error(msg.message));
-						cleanupTask();
-					}
-					break;
-			}
-		};
-
-		websocket.onclose = () => {
-			console.log("WebSocket 연결 종료");
-		}
-	};
-
-	const cleanupTask = () => {
-		currentServerType = null;
-		currentTaskResolver = null;
-	};
-
-	const resetTimers = async () => {
-		Object.values($timerListStore).forEach(timer => timer.reset());
-	};
-
-	const terminateTimers = async () => {
-		Object.values($timerListStore).forEach(timer => timer.terminate());
-	};
-
-	const resetLoadingState = async () => {
-		loadingState = [1, 1, 1];
-	};
-
-	let executeTask = async (serverType: number): Promise<void> => {
-		return new Promise((resolve, reject) => {
-			currentServerType = serverType;
-			currentTaskResolver = { resolve, reject };
-			websocket.send(JSON.stringify({
-				action: "start_task",
-				serverType
-			}));
-		});
-	};
-
-	let launchDeud = async () => {
-		if (!taskState) {
-			showNotification("error", "다른 사용자가 대응답 적재 중입니다.");
-			return;
-		}
-
-		if (runningState) {
-			showNotification("error", "이미 대응답 프로세스 진행 중입니다.");
-			return;
-		}
-
-		try {
-			runningState = true;
-
-			await resetTimers();
-			await resetLoadingState();
-
-			await executeTask(1);
-			await executeTask(2);
-			await executeTask(3);
-
-		} catch (error: any) {
-			if (error.message === "Task cancelled") {
-				showNotification("info", `대응답 프로세스가 중단되었습니다.`);
-			} else {
-				showNotification("error", `대응답 적재 중 에러가 발생했습니다. <br/> ${error}`);
-			}
-		} finally {
-			runningState = false;
-		}
-	}; 
+	const cancelTask = async () => {
+		await taskManager?.cancelOngoingTask();
+	}
 
 	beforeNavigate((navigation) => {
-		if (runningState) {
+		if (get(taskStore).runningState) {
 			if(!confirm("진행 중인 작업이 있습니다. 페이지를 이동하시겠습니까?")) {
 				navigation.cancel();
 			}
 		}
 	});
 
-	onDestroy(async () => {
-		await terminateTimers();
-		if (currentServerType !== null){
-			websocket.send(JSON.stringify({
-				action: "task_cancel",
-				serverType: currentServerType
-			}));
-		}
+	onDestroy(async() => {
+		// await taskManager?.cancelOngoingTask();
+		await WebSocketService.getInstance().close();
+		await taskManager?.initTaskStore();
 	});
 </script>
 
@@ -247,7 +110,7 @@
         </div>
 		
 		<div class="ws-state-block">
-			<div class="ws-state-block__dot" class:running-state={!taskState}></div>
+			<div class="ws-state-block__dot" class:running-state={!$taskStore.taskState}></div>
 			<span class="ws-state-block__text">대응답 적재 가능</span>
 		</div>
     </div>
@@ -268,9 +131,9 @@
 <!-- 2. 대응답 진행 상태 & 로딩 영역 Start-->
 <div class="deud-block">
     <div class="step-block">
-        <LoadingBox serverType={1} state={loadingState[0]}/>
-        <LoadingBox serverType={2} state={loadingState[1]}/>
-        <LoadingBox serverType={3} state={loadingState[2]}/>
+        <LoadingBox serverType={1} state={$taskStore.loadingState[0]}/>
+        <LoadingBox serverType={2} state={$taskStore.loadingState[1]}/>
+        <LoadingBox serverType={3} state={$taskStore.loadingState[2]}/>
     </div>
 </div>
 <!-- 2. 대응답 진행 상태 & 로딩 영역 End-->
@@ -280,10 +143,14 @@
 <!-- 3. 대응답 시작 버튼 영역 Start -->
 <div class="deud-block">
     <div class="launch-block">
-        <button class="launch-block__button" onclick={launchDeud}>
+        <button class="launch-block__button" onclick={startTask}>
             <span class="launch-block__button__text">대응답 Launch!</span>
         </button>
+		<button class="launch-block__button" onclick={cancelTask}>
+            <span class="launch-block__button__text">취소</span>
+        </button>
     </div>
+	
 </div>
 <!-- 3. 대응답 시작 버튼 영역 End -->
 

@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Server, LoadingState } from '$lib/constants/server';
-	import { timerStore } from './Timer';
+	import { timerStore } from './store/TimerStore';
 
 	let { serverType, state }: { serverType: number, state: number } = $props();
-
-	
-	
     const loadingBoxColor = ['#03e9f4', '#f355f4', '#ecb214'];
     
     onMount(() => {

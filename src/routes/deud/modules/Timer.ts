@@ -1,17 +1,5 @@
-import { writable } from 'svelte/store';
 import workerURL from './worker.js?url';
-
-interface TimerState {
-    [key: string]: { min: string; sec: string; msec: string; }
-};
-
-export const timerStore = writable<TimerState>({
-    'wdexpa1p': { min: '00', sec: '00', msec: '00' },
-    'edwap1t': { min: '00', sec: '00', msec: '00' },
-    'mypap1d': { min: '00', sec: '00', msec: '00' },
-});
-
-export const timerListStore = writable<Record<string, Timer>>({});
+import { timerStore } from '../store/TimerStore';
 
 export class Timer {
     private worker: Worker;
@@ -46,6 +34,7 @@ export class Timer {
     }
 
     reset() {
+        console.log(this.id);
         this.stop();
         timerStore.update((state) => {
             state[this.id] = { min: '00', sec: '00', msec: '00' };
