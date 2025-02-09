@@ -4,15 +4,17 @@
 	import { timerStore } from './store/TimerStore';
 
 	let { serverType, state }: { serverType: number, state: number } = $props();
-    const loadingBoxColor = ['#03e9f4', '#f355f4', '#ecb214'];
+
+    const LOADING_BOX_COLORS = ['#03e9f4', '#f355f4', '#ecb214'] as const;
+	const serverName: string = Server[serverType];
+
+	const loadingState: string = $derived(LoadingState[state]);
     
     onMount(() => {
 		const h2Element: HTMLElement = document.querySelector(`#loading-box-${serverType}`) as HTMLElement;
-		h2Element.style.setProperty('--loading-box-color', loadingBoxColor[serverType - 1]);
+		h2Element.style.setProperty('--loading-box-color', LOADING_BOX_COLORS[serverType - 1]);
 	});
 
-	const serverName: string = Server[serverType];
-	const loadingState: string = $derived(LoadingState[state]);
 </script>
 
 <div id="loading-box-{serverType}" class="step-block__loading-box step-block__loading-box--{loadingState}">
@@ -32,33 +34,36 @@
 </div>
 
 <style>
+	/* 기본 스타일 */
 	.step-block__loading-box {
+		--box-size: min(20rem, 27%);
         position: relative;
-		max-width: 20rem;
+		width: var(--box-size);
         max-height: calc(20vh);
-		width: 27%;
 		aspect-ratio: 1/1;
-		background: rgba(26, 26, 31, 0.685);
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		flex-direction: column;
-		transition: 0.5s;
-		overflow: hidden;
+		background: rgba(26, 26, 31, 0.685);
 		border-radius: 1rem;
+		transition: all 0.5s ease;
+		overflow: hidden;
 		-webkit-box-reflect: below 1px linear-gradient(transparent, #0004);
 	}
-
-	.step-block__loading-box--error {
-		border: 1px solid red;
-	}
-
+	
 	.step-block__loading-box:not(:last-child) {
 		margin-right: 9%;
 	}
 
-	.step-block__loading-box--success,
-	.step-block__loading-box:hover {
+	/* 로딩 상태별 스타일 */
+	.step-block__loading-box--error,
+	.step-block__loading-box--error:hover {
+		box-shadow: 0 0 2rem 0.5px rgba(247, 48, 48, 0.87);
+	}
+
+	.step-block__loading-box--success:not(.step-block__loading-box--error),
+	.step-block__loading-box:not(.step-block__loading-box--error):hover {
 		background: var(--loading-box-color);
 		color: #050801;
 		box-shadow:
@@ -68,7 +73,8 @@
 			0 0 75px var(--loading-box-color);
 	}
 
-	.step-block__loading-box h2 {
+	/* 로딩 박스 텍스트 스타일 */
+	.step-block__loading-box__text {
 		color: var(--loading-box-color);
 		overflow: hidden;
 		letter-spacing: 0.125rem;
@@ -76,114 +82,81 @@
 		transition: 0.5s;
 	}
 
-	.step-block__loading-box--error h2 {
+	.step-block__loading-box--error .step-block__loading-box__text {
 		color: red;
 	}
 
-	.step-block__loading-box--loading h2 {
+	.step-block__loading-box--loading .step-block__loading-box__text {
 		animation: typing 5s infinite;
 	}
 
-	.step-block__loading-box--success h2,
-	.step-block__loading-box:hover h2 {
+	.step-block__loading-box--success .step-block__loading-box__text,
+	.step-block__loading-box:hover .step-block__loading-box__text {
 		color: #111;
 	}
 
-	@keyframes typing {
-		0%,
-		100% {
-			width: 1rem;
-		}
-		45%, 55% {
-			width: 100%;
-		}
-	}
-	
+	/* 로딩 박스 타이머 스타일 */
 	.step-block__loading-box__time {
 		font-variant-numeric: tabular-nums;
 	}
 	
+	/* 로딩 박스 애니메이션 */
 	.step-block__loading-box--loading span {
+		--border-wide: 0.31rem;
 		position: absolute;
 		display: block;
+		background: linear-gradient(var(--gradient-angle), transparent, var(--loading-box-color))
 	}
 
 	.step-block__loading-box--loading span:nth-child(1) {
+		--gradient-angle: 90deg;
 		top: 0;
 		left: -100%;
 		width: 100%;
-		height: 0.31rem;
-		background: linear-gradient(90deg, transparent, var(--loading-box-color));
-		animation: animate1 2s linear infinite;
-		animation-delay: 0s;
+		height: var(--border-wide);
+		animation: animate-horizontal 2s linear infinite;
 	}
 
-	@keyframes animate1 {
-		0% {
-			left: -100%;
-		}
-
-		50%,
-		100% {
-			left: 100%;
-		}
+	.step-block__loading-box--loading span:nth-child(2) {
+		--gradient-angle: 180deg;
+		top: -100%;
+		right: 0;
+		width: var(--border-wide);
+		height: 100%;
+		animation: animate-vertical 2s linear infinite 0.5s;
 	}
 	
 	.step-block__loading-box--loading span:nth-child(3) {
+		--gradient-angle: 270deg;
 		bottom: 0;
-		right: -100%;
+		left: 100%;
 		width: 100%;
-		height: 0.31rem;
-		background: linear-gradient(270deg, transparent, var(--loading-box-color));
-		animation: animate2 2s linear infinite;
-		animation-delay: 1s;
+		height: var(--border-wide);
+		animation: animate-horizontal 2s linear infinite reverse;
 	}
-	@keyframes animate2 {
-		0% {
-			right: -100%;
-		}
-
-		50%,
-		100% {
-			right: 100%;
-		}
-	}
-	.step-block__loading-box--loading span:nth-child(2) {
-		top: -100%;
-		right: 0;
-		width: 0.31rem;
-		height: 100%;
-		background: linear-gradient(180deg, transparent, var(--loading-box-color));
-		animation: animate3 2s linear infinite;
-		animation-delay: 0.5s;
-	}
-	@keyframes animate3 {
-		0% {
-			top: -100%;
-		}
-
-		50%,
-		100% {
-			top: 100%;
-		}
-	}
+	
 	.step-block__loading-box--loading span:nth-child(4) {
-		bottom: -100%;
+		--gradient-angle: 360deg;
+		top: 100%;
 		left: 0;
-		width: 0.31rem;
+		width: var(--border-wide);
 		height: 100%;
-		background: linear-gradient(360deg, transparent, var(--loading-box-color));
-		animation: animate4 2s linear infinite;
-		animation-delay: 1.5s;
+		animation: animate-vertical 2s linear infinite 0.5s reverse;
 	}
-	@keyframes animate4 {
-		0% {
-			bottom: -100%;
-		}
 
-		50%,
-		100% {
-			bottom: 100%;
-		}
+	/* Animations */
+	@keyframes typing {
+		0%, 100% { width: 1rem; }
+		45%, 55% { width: 100%; }
+	}
+
+	@keyframes animate-horizontal {
+		from { left: -100%; }
+		50%, to { left: 100%; }
+	}
+
+	@keyframes animate-vertical {
+		from { top: -100%; }
+		50%, to { top: 100%; }
 	}
 </style>
