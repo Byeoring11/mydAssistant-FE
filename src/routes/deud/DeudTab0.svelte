@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import { flip } from 'svelte/animate';
 	import { beforeNavigate } from '$app/navigation';
 
 	import { send, receive } from '$lib/utils/transition/crossfade';
-	// import { Server, LoadingState } from '$lib/constants/server';
 	import XIcon from '$lib/components/svg/icons/XIcon.svelte';
 	import { showNotification } from '$lib/components/ui/FloatingUI/notificationStore';
 
-	// import { Timer } from './modules/Timer';
-	// import { timerListStore } from './store/TimerStore';
 	import LoadingBox from './LoadingBox.svelte';
 	import { CusnoValidator } from './modules/CusnoValidator';
-	import { get } from 'svelte/store';
 	import { TaskManager } from './modules/TaskManager';
 	import { WebSocketService } from './services/WebSocketService';
 	import { taskStore } from './store/TaskStore';
@@ -111,7 +108,15 @@
 		
 		<div class="ws-state-block">
 			<div class="ws-state-block__dot" class:running-state={!$taskStore.taskState}></div>
-			<span class="ws-state-block__text">대응답 적재 가능</span>
+			<span class="ws-state-block__text">
+				{#if $taskStore.taskState}
+				대응답 적재 가능
+				{:else if !$taskStore.taskState && $taskStore.runningState}
+				대응답 진행 중
+				{:else if !$taskStore.taskState && !$taskStore.runningState}
+				다른 사용자가 대응답 적재 중
+				{/if}
+			</span>
 		</div>
     </div>
     <!-- 1.2 고객번호 리스트 태그 영역 -->
@@ -146,9 +151,11 @@
         <button class="launch-block__button" onclick={startTask}>
             <span class="launch-block__button__text">대응답 Launch!</span>
         </button>
+		{#if $taskStore.runningState}
 		<button class="launch-block__button" onclick={cancelTask}>
-            <span class="launch-block__button__text">취소</span>
+            <span class="launch-block__button__text">대응답 중단하기</span>
         </button>
+		{/if}
     </div>
 	
 </div>
