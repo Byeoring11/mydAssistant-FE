@@ -63,7 +63,7 @@
 	let taskManager: TaskManager | null = $state(null);
 
 	onMount(async () => {
-		await WebSocketService.getInstance().connect("ws://172.30.1.42/ws");
+		await WebSocketService.getInstance().connect("ws://172.30.1.42/api/v1/deud/ws");
 		taskManager = new TaskManager();
 	});
 
