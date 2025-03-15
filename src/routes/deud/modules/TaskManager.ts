@@ -125,7 +125,7 @@ export class TaskManager {
 		taskStore.update((state) => ({ ...state, currentServerType: null, currentTaskResolver: null }));
 	}
 
-	public async launchDeud(): Promise<void> {
+	public async launchDeud(cusnoList: string[]): Promise<void> {
 		if (!get(taskStore).taskState) {
 			showNotification('error', '다른 사용자가 대응답 적재 중입니다.');
 			return;
@@ -140,10 +140,10 @@ export class TaskManager {
 			taskStore.update((state) => ({ ...state, runningState: true, loadingState: [1, 1, 1] }));
 
 			this.timerService.resetAllTimers();
-
-			await this.executeTask(1);
-			await this.executeTask(2);
-			await this.executeTask(3);
+			console.log(cusnoList);
+			await this.executeTask(1, cusnoList);
+			await this.executeTask(2, cusnoList);
+			await this.executeTask(3, cusnoList);
 		} catch (error) {
 			if (error instanceof DOMException && error.name === 'AbortError') {
 				showNotification('warning', `대응답 프로세스가 중단되었습니다.`);
@@ -158,7 +158,7 @@ export class TaskManager {
 		}
 	}
 
-	private async executeTask(serverType: number): Promise<void> {
+	private async executeTask(serverType: number, cusnoList: string[]): Promise<void> {
 		return new Promise((resolve, reject) => {
 			taskStore.update((state) => ({
 				...state,
@@ -168,7 +168,8 @@ export class TaskManager {
 			console.log(get(taskStore));
 			this.webSocketService.send({
 				action: 'start_task',
-				serverType
+				serverType,
+				cusnoList
 			});
 		});
 	}
@@ -179,7 +180,8 @@ export class TaskManager {
 		if ($taskStore.currentServerType !== null) {
 			this.webSocketService.send({
 				action: 'task_cancel',
-				serverType: $taskStore.currentServerType
+				serverType: $taskStore.currentServerType,
+				cusnoList: null
 			});
 		}
 	}

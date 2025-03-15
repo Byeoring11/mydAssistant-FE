@@ -34,7 +34,7 @@ export class WebSocketService {
       });
     }
   
-    public send(message: { action: string, serverType: number }): void {
+    public send(message: { action: string, serverType: number, cusnoList: string[] | null }): void {
       if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
         this.websocket.send(JSON.stringify(message));
       } else {

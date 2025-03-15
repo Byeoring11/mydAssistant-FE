@@ -63,12 +63,13 @@
 	let taskManager: TaskManager | null = $state(null);
 
 	onMount(async () => {
-		await WebSocketService.getInstance().connect("ws://172.30.1.42/api/v1/deud/ws");
+		await WebSocketService.getInstance().connect("ws://172.16.100.76/ws/v1/deud");
 		taskManager = new TaskManager();
 	});
 
 	const startTask = async () => {
-		await taskManager?.launchDeud();
+		console.log(validCusnoList);
+		await taskManager?.launchDeud(validCusnoList);
 	}
 
 	const cancelTask = async () => {
