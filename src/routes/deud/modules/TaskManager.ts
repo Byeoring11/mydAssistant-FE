@@ -127,12 +127,17 @@ export class TaskManager {
 
 	public async launchDeud(cusnoList: string[]): Promise<void> {
 		if (!get(taskStore).taskState) {
-			showNotification('error', '다른 사용자가 대응답 적재 중입니다.');
+			showNotification('error', '다른 사용자가 대응답 적재 중입니다');
 			return;
 		}
 
 		if (get(taskStore).runningState) {
-			showNotification('error', '이미 대응답 프로세스 진행 중입니다.');
+			showNotification('error', '이미 대응답 프로세스 진행 중입니다');
+			return;
+		}
+
+		if (cusnoList.length === 0) {
+			showNotification('error', '고객번호를 입력해주세요');
 			return;
 		}
 

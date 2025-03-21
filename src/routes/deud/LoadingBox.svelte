@@ -49,7 +49,7 @@
 		border-radius: 1rem;
 		transition: all 0.5s ease;
 		overflow: hidden;
-		-webkit-box-reflect: below 1px linear-gradient(transparent, #0004);
+		-webkit-box-reflect: below 1px linear-gradient(transparent, rgba(0, 0, 0, 0.116));
 	}
 	
 	.step-block__loading-box:not(:last-child) {
