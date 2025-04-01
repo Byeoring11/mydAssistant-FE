@@ -7,6 +7,7 @@
 	import { send, receive } from '$lib/utils/transition/crossfade';
 	import XIcon from '$lib/components/svg/icons/XIcon.svelte';
 	import { showNotification } from '$lib/components/ui/FloatingUI/notificationStore';
+	import { PUBLIC_WEBSOCKET_URL } from '$env/static/public';
 
 	import LoadingBox from './LoadingBox.svelte';
 	import { CusnoValidator } from './modules/CusnoValidator';
@@ -63,7 +64,7 @@
 	let taskManager: TaskManager | null = $state(null);
 
 	onMount(async () => {
-		await WebSocketService.getInstance().connect("ws://172.30.1.42/ws/v1/deud");
+		await WebSocketService.getInstance().connect(PUBLIC_WEBSOCKET_URL);
 		taskManager = new TaskManager();
 	});
 
