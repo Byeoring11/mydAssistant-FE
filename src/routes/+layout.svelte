@@ -177,7 +177,7 @@
 		display: flex;
 		flex-direction: column;
 		padding: 2rem;
-		overflow: auto;
+		overflow: hidden;
 	}
 
 	.sidebar__block {

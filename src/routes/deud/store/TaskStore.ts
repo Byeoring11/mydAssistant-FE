@@ -7,4 +7,5 @@ export const taskStore = writable<TaskType>({
     loadingState     : [1, 1, 1],
     currentServerType: null,
     currentTaskResolver: null,
+    isUnderMaintain  : true
 });

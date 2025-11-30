@@ -6,5 +6,6 @@ export interface TaskType {
     currentTaskResolver: {
         resolve: () => void;
         reject: (error: Error) => void;
-    } | null;
+    } | null,
+    isUnderMaintain  : boolean
 }

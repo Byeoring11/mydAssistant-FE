@@ -64,12 +64,14 @@
 	let taskManager: TaskManager | null = $state(null);
 
 	onMount(async () => {
+		return;
 		await WebSocketService.getInstance().connect(PUBLIC_WEBSOCKET_URL);
 		taskManager = new TaskManager();
 	});
 
 	const startTask = async () => {
-		await taskManager?.launchDeud(validCusnoList);
+		showNotification('warning', '현재 대응답 정비 중입니다...');
+		// await taskManager?.launchDeud(validCusnoList);
 	}
 
 	const cancelTask = async () => {
@@ -107,9 +109,11 @@
         </div>
 		
 		<div class="ws-state-block">
-			<div class="ws-state-block__dot" class:running-state={!$taskStore.taskState}></div>
+			<div class="ws-state-block__dot" class:running-state={$taskStore.isUnderMaintain || !$taskStore.taskState}></div>
 			<span class="ws-state-block__text">
-				{#if $taskStore.taskState}
+				{#if $taskStore.isUnderMaintain}
+				대응답 시스템 점검 중..
+				{:else if $taskStore.taskState}
 				대응답 적재 가능
 				{:else if !$taskStore.taskState && $taskStore.runningState}
 				대응답 진행 중

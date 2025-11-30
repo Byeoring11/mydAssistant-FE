@@ -17,13 +17,7 @@
 		<DeudTab0 />
 	</div>
 	<div id="content-1" class="deud-container" class:hidden={activeTabId !== 'tab-1'}>
-		<div class="deud-block">
-			<div class="launch-block">
-				<button class="launch-block__button" onclick={() => {console.log('launch')}}>
-					<span class="launch-block__button__text">대응답 Launch!</span>
-				</button>
-			</div>
-		</div>
+		
 	</div>
 </main>
 
