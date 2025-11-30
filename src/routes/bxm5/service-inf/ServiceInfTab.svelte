@@ -24,12 +24,12 @@
 		y: {
 			url: serviceInfEaiYes,
 			alt: 'EAI 호출이 있는 경우 등록 예시',
-			info: "<span class='color-text'>과거서비스CODE</span>와 <span class='color-text'>관련팀명</span>은 없는 경우 입력안해도 된다 (EAI 호출 포함 예시)"
+			info: ''
 		},
 		n: {
 			url: serviceInfEaiNo,
 			alt: 'EAI 호출이 없는 경우 등록 예시',
-			info: "<span class='color-text'>과거서비스CODE</span>와 <span class='color-text'>관련팀명</span>은 없는 경우 입력안해도 된다 (EAI 호출 제외 예시)"
+			info: ''
 		},
 		core: {
 			url: serviceInfCore,
@@ -60,10 +60,8 @@
 	<!-- Header -->
 	<header class="service-inf__header">
 		<div class="info-box">
-			<span class="info-icon">ℹ️</span>
 			<p>
-				보편적인 경우에 해당하는 예시만 있으니 참고용으로만 사용하세요! (화면번호: 516252)<br />
-				'과거서비스CODE'와 '관련팀명'은 없는 경우 입력안해도 됩니다!
+				ℹ️ 보편적인 경우에 해당하는 예시만 있으니 참고용으로만 사용하세요! (화면번호: 516252)
 			</p>
 		</div>
 	</header>
@@ -101,6 +99,15 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- Info Text -->
+		{#if currentImageData?.info}
+			<div class="info-wrapper">
+				<p class="info-text">
+					{@html currentImageData.info}
+				</p>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -109,7 +116,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 2rem;
+		gap: 1.5rem;
 		padding: 2rem;
 		width: 100%;
 		margin: 0 auto;
@@ -122,53 +129,83 @@
 	}
 
 	.info-box {
-		padding: 1rem 1.5rem;
-		background: rgba(6, 182, 212, 0.1);
-		border: 1px solid rgba(6, 182, 212, 0.2);
-		border-radius: 0.75rem;
+		padding: 1.25rem 1.75rem;
+		background: rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 1rem;
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.875rem;
 		align-items: flex-start;
-	}
-
-	.info-icon {
-		font-size: 1.25rem;
-		flex-shrink: 0;
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 	}
 
 	.info-box p {
 		margin: 0;
 		font-size: 0.875rem;
-		line-height: 1.6;
-		color: white;
+		line-height: 1.7;
+		color: rgba(255, 255, 255, 0.85);
+		font-weight: 400;
 	}
 
 	.button-group {
 		display: flex;
-		gap: 1rem;
+		gap: 0.875rem;
 		flex-wrap: wrap;
 		justify-content: center;
 	}
 
 	.service-inf-btn {
-		padding: 0.75rem 1.5rem;
-		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
-		color: white;
-		border-radius: 0.5rem;
+		position: relative;
+		padding: 0.875rem 1.75rem;
+		background: rgba(255, 255, 255, 0.08);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		color: rgba(255, 255, 255, 0.9);
+		border-radius: 0.75rem;
 		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: all 0.3s ease;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	.service-inf-btn::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(239, 68, 68, 0.3));
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		z-index: -1;
 	}
 
 	.service-inf-btn:hover {
-		background: linear-gradient(to right bottom, var(--color-secondary-1), var(--color-secondary-2));
+		background: rgba(255, 255, 255, 0.12);
+		border-color: rgba(255, 255, 255, 0.25);
 		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	}
+
+	.service-inf-btn:hover::before {
+		opacity: 1;
 	}
 
 	.service-inf-btn.active {
-		background: linear-gradient(to right bottom, var(--color-primary-1), var(--color-primary-2));
+		background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(239, 68, 68, 0.25));
+		border-color: rgba(236, 72, 153, 0.5);
 		color: #ffffff;
+		box-shadow: 0 8px 32px rgba(236, 72, 153, 0.4);
+	}
+
+	.service-inf-btn.active::before {
+		opacity: 0;
 	}
 
 	.content-display {
@@ -176,7 +213,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 1.5rem;
 	}
 
 	.image-wrapper {
@@ -184,15 +220,75 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		min-height: 400px;
-		border-radius: 0.75rem;
+		border-radius: 1rem;
 		overflow: auto;
 	}
 
 	.example-image {
-		width: auto;
-		height: auto;
 		max-width: 100%;
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.info-message {
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 0.95rem;
+		text-align: center;
+		font-weight: 400;
+	}
+
+	.info-wrapper {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+        padding: 2rem;
+	}
+
+	.info-text {
+		margin: 0;
+		padding: 1rem 1.75rem;
+		background: rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 0.75rem;
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 0.9rem;
+		text-align: center;
+		line-height: 1.7;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+	}
+
+	.info-text :global(.color-text) {
+		color: #ec4899;
+		font-weight: 600;
+		text-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+	}
+
+	/* 반응형 디자인 */
+	@media (max-width: 768px) {
+		.service-inf-block {
+			padding: 1rem;
+			gap: 1.25rem;
+		}
+
+		.info-box {
+			padding: 1rem 1.25rem;
+		}
+
+		.button-group {
+			flex-direction: column;
+			width: 100%;
+			gap: 0.75rem;
+		}
+
+		.service-inf-btn {
+			width: 100%;
+		}
+
+		.image-wrapper {
+			min-height: 300px;
+			padding: 1rem;
+		}
 	}
 </style>
