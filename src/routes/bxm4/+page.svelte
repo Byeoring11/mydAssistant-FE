@@ -2,6 +2,7 @@
 <script lang="ts">
 	import ContainerTab from "$lib/components/ui/ContainerTab/ContainerTab.svelte";
     import GenDatTab from "./dat/GenDatTab.svelte";
+    import OmmConverterTab from "./omm-converter/OmmConverterTab.svelte";
 
     let activeTabId = $state('tab-0');
 </script>
@@ -19,9 +20,9 @@
         <GenDatTab />
 	</div>
 
-    <!-- SERVICE_INF 예시 탭 -->
+    <!-- Table↔️DBIO omm 변환 탭 -->
 	<div id="content-1" class="tab-content-container" class:hidden={activeTabId !== 'tab-1'}>
-        <GenDatTab />
+        <OmmConverterTab />
 	</div>
 
     <!-- 소스 프레임 생성 탭 -->

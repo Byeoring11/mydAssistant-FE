@@ -3,292 +3,290 @@
 	import serviceInfEaiNo from '$lib/images/service_inf_no_eai.png';
 	import serviceInfCore from '$lib/images/service_inf_core.png';
 
-	// Svelte 5 runes 사용
-	let activeType = $state<'y' | 'n' | 'core' | null>(null);
+	// ============================================================================
+	// Types & Interfaces
+	// ============================================================================
 
-	// 이미지 데이터 타입 정의
-	interface ImageData {
+	interface ExampleData {
+		id: string;
 		url: string;
 		alt: string;
-		info: string;
+		title: string;
+		color: string;
+		icon: string;
 	}
 
-	type ImageMapType = {
-		y: ImageData;
-		n: ImageData;
-		core: ImageData;
-	};
+	// ============================================================================
+	// State Management
+	// ============================================================================
 
-	// 이미지 경로 및 정보 정의
-	const imageMap: ImageMapType = {
-		y: {
+	let selectedId = $state<string>('eai-yes');
+	let isImageLoading = $state(false);
+
+	// ============================================================================
+	// Constants
+	// ============================================================================
+
+	const examples: ExampleData[] = [
+		{
+			id: 'eai-yes',
 			url: serviceInfEaiYes,
-			alt: 'EAI 호출이 있는 경우 등록 예시',
-			info: ''
+			alt: 'EAI 호출 포함',
+			title: 'EAI 호출이 있는 경우',
+			color: '#8b5cf6',
+			icon: '①'
 		},
-		n: {
+		{
+			id: 'eai-no',
 			url: serviceInfEaiNo,
-			alt: 'EAI 호출이 없는 경우 등록 예시',
-			info: ''
+			alt: 'EAI 호출 제외',
+			title: 'EAI 호출이 없는 경우',
+			color: '#06b6d4',
+			icon: '②'
 		},
-		core: {
+		{
+			id: 'core',
 			url: serviceInfCore,
-			alt: '코어 연계 등록 예시',
-			info: "<span class='color-text'>과거서비스CODE</span>와 <span class='color-text'>관련팀명</span>은 없는 경우 입력안해도 된다 (코어 연계 예시)"
+			alt: '코어 시스템 연계',
+			title: '코어 연계의 경우',
+			color: '#ec4899',
+			icon: '③'
 		}
+	];
+
+	// ============================================================================
+	// Derived State
+	// ============================================================================
+
+	const selectedExample = $derived(examples.find((ex) => ex.id === selectedId));
+	const showCoreNotice = $derived(selectedId === 'core');
+
+	// ============================================================================
+	// Event Handlers
+	// ============================================================================
+
+	const handleSelect = (id: string): void => {
+		if (selectedId === id) return;
+		isImageLoading = true;
+		selectedId = id;
 	};
 
-	/**
-	 * 버튼 클릭 시 이미지 및 정보 업데이트
-	 */
-	const showImg = (type: 'y' | 'n' | 'core'): void => {
-		if (activeType === type) {
-			// 이미 활성화된 버튼을 다시 클릭하면 토글하지 않고 유지
-			return;
-		}
-
-		// 활성화 상태 업데이트
-		activeType = type;
+	const handleImageLoad = (): void => {
+		isImageLoading = false;
 	};
-
-	// 현재 선택된 이미지 정보 (파생 상태)
-	const currentImageData = $derived(activeType ? imageMap[activeType] : null);
 </script>
 
-<!-- Main Layout -->
-<div class="service-inf-block">
-	<!-- Header -->
-	<header class="service-inf__header">
-		<div class="info-box">
-			<p>
-				ℹ️ 보편적인 경우에 해당하는 예시만 있으니 참고용으로만 사용하세요! (화면번호: 516252)
-			</p>
-		</div>
-	</header>
+<div class="container">
+	<!-- Top Navigation -->
+	<nav class="top-nav">
+		{#each examples as example}
+			<button
+				class="tab"
+				class:active={selectedId === example.id}
+				onclick={() => handleSelect(example.id)}
+				style="--accent-color: {example.color}"
+			>
+				<span class="tab-icon">{example.icon}</span>
+				<span class="tab-title">{example.title}</span>
+			</button>
+		{/each}
+	</nav>
 
-	<!-- Button Group -->
-	<div class="button-group">
-		<button class="service-inf-btn" class:active={activeType === 'y'} onclick={() => showImg('y')}>
-			EAI 호출이 있는 경우
-		</button>
-		<button class="service-inf-btn" class:active={activeType === 'n'} onclick={() => showImg('n')}>
-			EAI 호출이 없는 경우
-		</button>
-		<button
-			class="service-inf-btn"
-			class:active={activeType === 'core'}
-			onclick={() => showImg('core')}
-		>
-			코어 연계의 경우
-		</button>
-	</div>
+	<!-- Image Viewer -->
+	{#if selectedExample}
+		<div class="content-wrapper">
+			{#key selectedExample.id}
+				<div class="viewer">
+					<img
+						src={selectedExample.url}
+						alt={selectedExample.alt}
+						class="image"
+						class:loaded={!isImageLoading}
+						onload={handleImageLoad}
+					/>
+				</div>
+			{/key}
 
-	<!-- Image and Info Display -->
-	<div class="content-display">
-		<!-- Image Area -->
-		<div class="image-wrapper">
-			{#if currentImageData}
-				<img
-					src={currentImageData.url}
-					alt={currentImageData.alt}
-					class="example-image"
-				/>
-			{:else}
-				<div class="info-message">
-					위에 있는 버튼 중 하나를 클릭하여 예시를 확인하세요.
+			<!-- Core Notice -->
+			{#if showCoreNotice}
+				<div class="notice">
+					<div class="notice-icon">💡</div>
+					<p class="notice-text">
+						<span class="highlight">과거서비스CODE</span>와
+						<span class="highlight">관련팀명</span>은 없는 경우 입력하지 않아도 됩니다
+					</p>
 				</div>
 			{/if}
 		</div>
-
-		<!-- Info Text -->
-		{#if currentImageData?.info}
-			<div class="info-wrapper">
-				<p class="info-text">
-					{@html currentImageData.info}
-				</p>
-			</div>
-		{/if}
-	</div>
+	{/if}
 </div>
 
 <style>
-	.service-inf-block {
+	.container {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		min-height: 100vh;
+	}
+
+	/* Top Navigation */
+	.top-nav {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 1rem;
+	}
+
+	.tab {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1.25rem;
+		background: rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 2rem;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.875rem;
+		overflow: hidden;
+	}
+
+	.tab::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color) 80%, white));
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		border-radius: 2rem;
+		z-index: -1;
+	}
+
+	.tab:hover {
+		color: rgba(255, 255, 255, 0.95);
+		background: rgba(255, 255, 255, 0.08);
+		border-color: color-mix(in srgb, var(--accent-color) 60%, transparent);
+		transform: translateY(-2px);
+		box-shadow: 
+			0 4px 12px rgba(0, 0, 0, 0.2),
+			0 0 20px color-mix(in srgb, var(--accent-color) 50%, transparent),
+			0 0 40px color-mix(in srgb, var(--accent-color) 30%, transparent);
+	}
+
+	.tab:hover::before {
+		opacity: 0.6;
+	}
+
+	.tab.active {
+		color: #ffffff;
+		border-color: color-mix(in srgb, var(--accent-color) 50%, transparent);
+		background: linear-gradient(135deg, color-mix(in srgb, var(--accent-color) 25%, transparent), color-mix(in srgb, var(--accent-color) 20%, transparent));
+		box-shadow: 0 4px 16px color-mix(in srgb, var(--accent-color) 40%, transparent);
+	}
+
+	.tab.active::before {
+		opacity: 0;
+	}
+
+	.tab-icon {
+		font-size: 1.125rem;
+		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+	}
+
+	.tab-title {
+		font-weight: 600;
+		letter-spacing: -0.01em;
+	}
+
+	/* Content Wrapper */
+	.content-wrapper {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 1.5rem;
 		padding: 2rem;
-		width: 100%;
-		margin: 0 auto;
 	}
 
-	.service-inf__header {
+	/* Viewer */
+	.viewer {
 		width: 100%;
 		display: flex;
 		justify-content: center;
-	}
-
-	.info-box {
-		padding: 1.25rem 1.75rem;
-		background: rgba(255, 255, 255, 0.05);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 1rem;
-		display: flex;
-		gap: 0.875rem;
 		align-items: flex-start;
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 	}
 
-	.info-box p {
-		margin: 0;
-		font-size: 0.875rem;
-		line-height: 1.7;
-		color: rgba(255, 255, 255, 0.85);
-		font-weight: 400;
-	}
-
-	.button-group {
-		display: flex;
-		gap: 0.875rem;
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.service-inf-btn {
-		position: relative;
-		padding: 0.875rem 1.75rem;
-		background: rgba(255, 255, 255, 0.08);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: rgba(255, 255, 255, 0.9);
-		border-radius: 0.75rem;
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-		overflow: hidden;
-	}
-
-	.service-inf-btn::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(239, 68, 68, 0.3));
+	.image {
+		max-width: 100%;
+		height: auto;
+		display: block;
 		opacity: 0;
-		transition: opacity 0.3s ease;
-		z-index: -1;
+		transition: opacity 0.4s ease;
 	}
 
-	.service-inf-btn:hover {
-		background: rgba(255, 255, 255, 0.12);
-		border-color: rgba(255, 255, 255, 0.25);
-		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-	}
-
-	.service-inf-btn:hover::before {
+	.image.loaded {
 		opacity: 1;
 	}
 
-	.service-inf-btn.active {
-		background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(239, 68, 68, 0.25));
-		border-color: rgba(236, 72, 153, 0.5);
-		color: #ffffff;
-		box-shadow: 0 8px 32px rgba(236, 72, 153, 0.4);
-	}
-
-	.service-inf-btn.active::before {
-		opacity: 0;
-	}
-
-	.content-display {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
+	/* Notice */
+	.notice {
+		display: inline-flex;
 		align-items: center;
-	}
-
-	.image-wrapper {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border-radius: 1rem;
-		overflow: auto;
-	}
-
-	.example-image {
-		max-width: 100%;
-		border-radius: 0.75rem;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.info-message {
-		color: rgba(255, 255, 255, 0.5);
-		font-size: 0.95rem;
-		text-align: center;
-		font-weight: 400;
-	}
-
-	.info-wrapper {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-        padding: 2rem;
-	}
-
-	.info-text {
-		margin: 0;
-		padding: 1rem 1.75rem;
-		background: rgba(255, 255, 255, 0.05);
+		gap: 1rem;
+		padding: 1rem 1rem;
+		background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.1));
 		backdrop-filter: blur(10px);
 		-webkit-backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 0.75rem;
-		color: rgba(255, 255, 255, 0.85);
-		font-size: 0.9rem;
-		text-align: center;
-		line-height: 1.7;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		border: 1px solid rgba(236, 72, 153, 0.3);
+		border-radius: 1rem;
+		box-shadow: 0 4px 16px rgba(236, 72, 153, 0.15);
 	}
 
-	.info-text :global(.color-text) {
+	.notice-icon {
+		font-size: 1.2rem;
+		flex-shrink: 0;
+		filter: drop-shadow(0 2px 4px rgba(236, 72, 153, 0.4));
+	}
+
+	.notice-text {
+		margin: 0;
+		font-size: 0.95rem;
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.notice-text .highlight {
 		color: #ec4899;
-		font-weight: 600;
+		font-weight: 700;
+		padding: 0.125rem 0.5rem;
+		background: rgba(236, 72, 153, 0.2);
+		border-radius: 0.375rem;
 		text-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
 	}
 
-	/* 반응형 디자인 */
+	/* Responsive */
 	@media (max-width: 768px) {
-		.service-inf-block {
-			padding: 1rem;
-			gap: 1.25rem;
-		}
-
-		.info-box {
-			padding: 1rem 1.25rem;
-		}
-
-		.button-group {
+		.top-nav {
 			flex-direction: column;
-			width: 100%;
-			gap: 0.75rem;
+			align-items: stretch;
 		}
 
-		.service-inf-btn {
-			width: 100%;
+		.tab {
+			justify-content: center;
 		}
 
-		.image-wrapper {
-			min-height: 300px;
+		.content-wrapper {
 			padding: 1rem;
+			gap: 1rem;
+		}
+
+		.notice {
+			flex-direction: column;
+			text-align: center;
 		}
 	}
 </style>
