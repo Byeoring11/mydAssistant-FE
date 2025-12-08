@@ -45,7 +45,7 @@ export const WORKFLOW_STEPS = [
 	{
 		key: 'step1' as const,
 		title: 'Step 1. DAT 파일 생성',
-		description: 'mdwap1p 서버에서 PostgreSQL 데이터 추출'
+		description: 'mdwap1t_p 서버에서 DW 데이터 추출'
 	},
 	{
 		key: 'step2' as const,
@@ -55,6 +55,6 @@ export const WORKFLOW_STEPS = [
 	{
 		key: 'step3' as const,
 		title: 'Step 3. DAT 파일 적재',
-		description: 'mypap1d 서버에 Tibero와 PostgreSQL DB 적재'
+		description: 'mypap1d 서버의 Tibero와 PostgreSQL DB 적재'
 	}
 ] as const;

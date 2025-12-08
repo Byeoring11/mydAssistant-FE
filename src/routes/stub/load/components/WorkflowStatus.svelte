@@ -135,7 +135,7 @@
 		background: conic-gradient(
 			from 0deg,
 			transparent,
-			rgba(96, 165, 250, 0.5),
+			#60a5fa80,
 			rgba(139, 92, 246, 0.5),
 			transparent 75%
 		);

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ContainerTab from '$lib/components/ui/ContainerTab/ContainerTab.svelte';
 	import StubLoadTab from './load/StubLoadTab.svelte';
+	import StubHistoryTab from './history/StubHistoryTab.svelte';
 
 	let activeTabId = $state('tab-0');
 </script>
@@ -17,7 +18,7 @@
 		<StubLoadTab />
 	</div>
 	<div id="content-1" class="stub-container" class:hidden={activeTabId !== 'tab-1'}>
-
+		<StubHistoryTab />
 	</div>
 </main>
 

@@ -11,6 +11,17 @@ import { StubTimerService } from './TimerService';
 import { createLoadHistory } from '$lib/api/stubApi';
 import type { LoadHistoryCreateRequest } from '$lib/api/stubApi';
 
+/**
+ * UUID v4 생성 (브라우저 호환)
+ */
+function generateUUID(): string {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+		const r = (Math.random() * 16) | 0;
+		const v = c === 'x' ? r : (r & 0x3) | 0x8;
+		return v.toString(16);
+	});
+}
+
 export class StubWebSocketService {
 	private static instance: StubWebSocketService;
 	private ws: WebSocket | null = null;
@@ -355,7 +366,7 @@ export class StubWebSocketService {
 
 		// 작업 시작 시간 기록 및 배치 ID 생성
 		this.workflowStartTime = new Date();
-		this.currentBatchId = crypto.randomUUID();
+		this.currentBatchId = generateUUID();
 
 		// 세션 시작
 		this.send({
@@ -458,6 +469,9 @@ export class StubWebSocketService {
 			const response = await createLoadHistory(historyData);
 			console.log('[STUB-WS] History recorded:', response);
 			stubStore.addOutputLog(`[INFO] 작업 이력 저장 완료 (${response.inserted_count}건)\n`);
+
+			// 이력 갱신 이벤트 발생
+			window.dispatchEvent(new CustomEvent('stub-history-updated'));
 		} catch (error) {
 			console.error('[STUB-WS] Failed to record history:', error);
 			stubStore.addOutputLog(`[WARNING] 작업 이력 저장 실패: ${error}\n`);

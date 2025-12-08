@@ -3,7 +3,7 @@
  * 작업 이력 적재 및 조회 API (리팩토링 버전)
  */
 
-import { post, get, del, put } from './apiClient';
+import { post, get, del, patch } from './apiClient';
 
 /** 작업 이력 생성 요청 */
 export interface LoadHistoryCreateRequest {
@@ -92,12 +92,12 @@ export async function createLoadHistory(
  * 작업 이력 목록 조회
  *
  * 필터 없이 조회 시: 최근 100건 반환
- * 고객번호, IP, 배치 ID로 필터링 가능
+ * 고객번호, IP, Note로 필터링 가능
  */
 export async function getLoadHistories(params?: {
 	customer_number?: string;
 	client_ip?: string;
-	batch_id?: string;
+	note?: string;
 	limit?: number;
 	offset?: number;
 }): Promise<LoadHistoryListResponse> {
@@ -131,7 +131,7 @@ export async function updateLoadHistoryNote(
 	historyId: number,
 	request: LoadHistoryNoteUpdateRequest
 ): Promise<LoadHistoryNoteUpdateResponse> {
-	return post<LoadHistoryNoteUpdateResponse>(
+	return patch<LoadHistoryNoteUpdateResponse>(
 		`/api/v1/stub/histories/${historyId}/note`,
 		request
 	);
