@@ -13,7 +13,7 @@ export const load: LayoutLoad = async () => {
 		{ path: '/bxm5', label: 'BXM5', tag: 'bxm5' },
 		{ path: '/bxm4', label: 'BXM4', tag: 'bxm4' },
 		{ path: '/diff', label: 'Diff', tag: 'diff' },
-		{ path: '/utils', label: 'Utils', tag: 'utils' }
+		{ path: '/utils', label: 'Utils', tag: 'utils' },
     ];
 
     return { navItems };

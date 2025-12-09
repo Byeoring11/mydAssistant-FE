@@ -64,7 +64,7 @@
 				</div>
 			</div>
 			<div class="sidebar__block">
-				<a href="/patch-note" class="sidebar__patch-note">
+				<a href="/patchnote" class="sidebar__patch-note">
 					<span class="sidebar__patch-note__text">패치 노트</span>
 				</a>
 			</div>

@@ -44,6 +44,13 @@
 			description: '개발에 유용한 다양한 유틸리티 도구를 제공합니다',
 			icon: '🛠️',
 			gradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(147, 51, 234, 0.15))'
+		},
+		{
+			path: '/patchnote',
+			title: 'Patch Note',
+			description: '업데이트 및 패치 이력을 타임라인으로 관리합니다',
+			icon: '📝',
+			gradient: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15))'
 		}
 	];
 
@@ -77,22 +84,6 @@
 				</div>
 			</button>
 		{/each}
-	</div>
-
-	<!-- Quick Stats -->
-	<div class="stats-section">
-		<div class="stat-card">
-			<div class="stat-value">5</div>
-			<div class="stat-label">활성 서비스</div>
-		</div>
-		<div class="stat-card">
-			<div class="stat-value">24/7</div>
-			<div class="stat-label">운영 시간</div>
-		</div>
-		<div class="stat-card">
-			<div class="stat-value">∞</div>
-			<div class="stat-label">생산성 향상</div>
-		</div>
 	</div>
 </div>
 
